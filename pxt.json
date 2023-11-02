@@ -2,7 +2,9 @@
     "name": "spillespil",
     "description": "",
     "dependencies": {
-        "device": "*"
+        "device": "*",
+        "arcade-story": "github:microsoft/arcade-storytelling#v1.0.3",
+        "animation": "*"
     },
     "files": [
         "main.blocks",

@@ -1,61 +1,149 @@
+enum ActionKind {
+    Walking,
+    Idle,
+    Jumping
+}
 namespace SpriteKind {
     export const grfdgx = SpriteKind.create()
     export const Coin = SpriteKind.create()
     export const Mor = SpriteKind.create()
+    export const Inspektør = SpriteKind.create()
+    export const bog = SpriteKind.create()
+    export const complete = SpriteKind.create()
+    export const bog2 = SpriteKind.create()
+    export const ven = SpriteKind.create()
+    export const BOG3 = SpriteKind.create()
+    export const BOG4 = SpriteKind.create()
+    export const BOG5 = SpriteKind.create()
 }
-function levelStart () {
-    SKoledreng.ax = 0
-    if (level == 0) {
-        tiles.setTilemap(tilemap`level1`)
-    } else if (level == 1) {
-        tiles.setTilemap(tilemap`level2`)
-    } else if (level == 2) {
-        game.over(true)
+controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (SKoledreng.isHittingTile(CollisionDirection.Bottom)) {
+        SKoledreng.vy = -80
+        animation.setAction(SKoledreng, ActionKind.Walking)
+        walker = animation.createAnimation(ActionKind.Walking, 200)
+        walker.addAnimationFrame(img`
+            . . . . f f f f . . . . 
+            . . f f e e e e f f . . 
+            . f f e e e e e e f f . 
+            f f f f 4 e e e f f f f 
+            f f f 4 4 4 e e f f f f 
+            f f f 4 4 4 4 e e f f f 
+            f 4 e 4 4 4 4 4 4 e 4 f 
+            f 4 4 f f 4 4 f f 4 4 f 
+            f e 4 d d d d d d 4 e f 
+            . f e d d b b d d e f . 
+            . f f e 4 4 4 4 e f f . 
+            e 4 f b 1 1 1 1 b f 4 e 
+            4 d f 1 1 1 1 1 1 f d 4 
+            4 4 f 6 6 6 6 6 6 f 4 4 
+            . . . f f f f f f . . . 
+            . . . f f . . f f . . . 
+            `)
+        walker.addAnimationFrame(img`
+            . . . . f f f f . . . . 
+            . . f f e e e e f f . . 
+            . f f e e e e e e f f . 
+            f f f f 4 e e e f f f f 
+            f f f 4 4 4 e e f f f f 
+            f f f 4 4 4 4 e e f f f 
+            f 4 e 4 4 4 4 4 4 e 4 f 
+            f 4 4 f f 4 4 f f 4 4 f 
+            f e 4 d d d d d d 4 e f 
+            . f e d d b b d d e f . 
+            . f f e 4 4 4 4 e f f . 
+            e 4 f b 1 1 1 1 b f 4 e 
+            4 d f 1 1 1 1 1 1 f d 4 
+            4 4 f 6 6 6 6 6 6 f 4 4 
+            . . . f f f f f f . . . 
+            . . . f f . . f f . . . 
+            `)
+        animation.attachAnimation(SKoledreng, walker)
+        gå = true
     }
-    for (let value of tiles.getTilesByType(assets.tile`tile13`)) {
-        tiles.placeOnTile(SKoledreng, value)
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.ven, function (sprite, otherSprite) {
+    VEN.sayText("VI har travlt!", 2000, false)
+    VEN.follow(SKoledreng)
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Inspektør, function (sprite, otherSprite) {
+    game.gameOver(true)
+})
+info.onCountdownEnd(function () {
+    game.setGameOverMessage(false, "Du nåede ikke i skole")
+    game.gameOver(false)
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Projectile, function (sprite, otherSprite) {
+    music.play(music.melodyPlayable(music.smallCrash), music.PlaybackMode.UntilDone)
+    game.setGameOverMessage(false, "Du blev kørt ned")
+    game.gameOver(false)
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.BOG5, function (sprite, otherSprite) {
+    Dialogmode = true
+    game.showLongText("Løs regnestykket 42/6", DialogLayout.Bottom)
+    story.showPlayerChoices("7", "8")
+    if (story.checkLastAnswer("7")) {
+        info.changeScoreBy(1)
+        BOG5.setKind(SpriteKind.complete)
+    } else if (story.checkLastAnswer("8")) {
+        info.changeScoreBy(-1)
     }
-    for (let value of tiles.getTilesByType(sprites.castle.tileDarkGrass3)) {
-        tiles.setTileAt(value, assets.tile`tile0`)
-        death = sprites.create(img`
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 
-            `, SpriteKind.grfdgx)
+    pause(500)
+    Dialogmode = false
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.bog2, function (sprite, otherSprite) {
+    Dialogmode = true
+    game.showLongText("Løs regnestykket 22-5", DialogLayout.Bottom)
+    story.showPlayerChoices("19", "17")
+    if (story.checkLastAnswer("17")) {
+        info.changeScoreBy(1)
+        bog2.setKind(SpriteKind.complete)
+    } else if (story.checkLastAnswer("19")) {
+        info.changeScoreBy(-1)
     }
-}
-sprites.onOverlap(SpriteKind.Player, SpriteKind.Coin, function (sprite, otherSprite) {
-    info.changeScoreBy(1)
-    otherSprite.destroy()
+    pause(500)
+    Dialogmode = false
 })
-controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-	
+sprites.onOverlap(SpriteKind.Player, SpriteKind.bog, function (sprite, otherSprite) {
+    Dialogmode = true
+    game.showLongText("Løs regnestykket 6+6", DialogLayout.Bottom)
+    story.showPlayerChoices("11", "12")
+    if (story.checkLastAnswer("12")) {
+        info.changeScoreBy(1)
+        bog1.setKind(SpriteKind.complete)
+    } else if (story.checkLastAnswer("11")) {
+        info.changeScoreBy(-1)
+    }
+    pause(500)
+    Dialogmode = false
 })
-scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile4`, function (sprite, location) {
-    VEN.follow(SKoledreng, 100)
-    VEN.sayText("Hej PETER", 2000, false)
+sprites.onOverlap(SpriteKind.Player, SpriteKind.BOG3, function (sprite, otherSprite) {
+    Dialogmode = true
+    game.showLongText("Løs regnestykket 9X8", DialogLayout.Bottom)
+    story.showPlayerChoices("74", "72")
+    if (story.checkLastAnswer("72")) {
+        info.changeScoreBy(1)
+        BOG3.setKind(SpriteKind.complete)
+    } else if (story.checkLastAnswer("74")) {
+        info.changeScoreBy(-1)
+    }
+    pause(500)
+    Dialogmode = false
 })
-scene.onOverlapTile(SpriteKind.Player, assets.tile`tile0`, function (sprite, location) {
-	
-})
-let death: Sprite = null
+let Bil5: Sprite = null
+let Bil4: Sprite = null
+let Bil3: Sprite = null
+let BIl2: Sprite = null
+let BIL1: Sprite = null
+let gå = false
+let walker: animation.Animation = null
+let BOG5: Sprite = null
+let BOG3: Sprite = null
+let bog2: Sprite = null
+let bog1: Sprite = null
+let Dialogmode = false
 let VEN: Sprite = null
 let SKoledreng: Sprite = null
 let level = 0
-level = 0
 scene.setBackgroundImage(img`
     9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
     9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
@@ -178,6 +266,7 @@ scene.setBackgroundImage(img`
     9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
     9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
     `)
+tiles.setTilemap(tilemap`level1`)
 SKoledreng = sprites.create(img`
     . . . . f f f f . . . . 
     . . f f e e e e f f . . 
@@ -214,6 +303,24 @@ let MOR = sprites.create(img`
     . . . f f 1 d 1 d 1 d f f . . . 
     . . . . . f f b b f f . . . . . 
     `, SpriteKind.Mor)
+let Lærer = sprites.create(img`
+    . . . . . f f f f . . . . . 
+    . . . f f 5 5 5 5 f f . . . 
+    . . f 5 5 5 5 5 5 5 5 f . . 
+    . f 5 5 5 5 5 5 5 5 5 5 f . 
+    . f 5 5 5 d b b d 5 5 5 f . 
+    f 5 5 5 b 4 4 4 4 b 5 5 5 f 
+    f 5 5 c c 4 4 4 4 c c 5 5 f 
+    f b b f b f 4 4 f b f b b f 
+    f b b 4 1 f d d f 1 4 b b f 
+    . f b f d d d d d d f b f . 
+    . f e f e 4 4 4 4 e f e f . 
+    . e 4 f 6 9 9 9 9 6 f 4 e . 
+    . 4 d c 9 9 9 9 9 9 c d 4 . 
+    . 4 f b 3 b 3 b 3 b b f 4 . 
+    . . f f 3 b 3 b 3 3 f f . . 
+    . . . . f f b b f f . . . . 
+    `, SpriteKind.Inspektør)
 VEN = sprites.create(img`
     . . . . f f f f . . . . . 
     . . f f f f f f f f . . . 
@@ -231,24 +338,364 @@ VEN = sprites.create(img`
     e e f 6 6 6 6 6 6 f e e . 
     . . . f f f f f f . . . . 
     . . . f f . . f f . . . . 
-    `, SpriteKind.Projectile)
-levelStart()
-controller.moveSprite(SKoledreng, 100, 0)
+    `, SpriteKind.ven)
 tiles.placeOnRandomTile(VEN, assets.tile`myTile4`)
-tiles.placeOnRandomTile(MOR, assets.tile`myTile3`)
+tiles.placeOnRandomTile(MOR, assets.tile`tile22`)
+tiles.placeOnTile(Lærer, tiles.getTileLocation(91, 6))
 tiles.placeOnRandomTile(SKoledreng, assets.tile`tile22`)
+Dialogmode = false
+info.startCountdown(30)
 SKoledreng.sayText("Hej Hej Mor!", 2000, false)
-MOR.sayText("PAS NU PÅ BILERNE!")
+MOR.sayText("Skynd dig, du har kun 30 sek")
 SKoledreng.ay = 150
+bog1 = sprites.create(img`
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . f e d d d d e . . . . . . . 
+    . . f e d d d d e . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    `, SpriteKind.bog)
+tiles.placeOnTile(bog1, tiles.getTileLocation(13, 10))
+bog2 = sprites.create(img`
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . f e d d d d e . . . . . . . 
+    . . f e d d d d e . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    `, SpriteKind.bog2)
 scene.cameraFollowSprite(SKoledreng)
-game.onUpdate(function () {
-    for (let BIL1 of sprites.allOfKind(SpriteKind.Enemy)) {
-        if (BIL1.isHittingTile(CollisionDirection.Left)) {
-            BIL1.vx = 100
-            BIL1.image.flipX()
-        } else if (BIL1.isHittingTile(CollisionDirection.Right)) {
-            BIL1.vx = 100
-            BIL1.image.flipX()
-        }
+tiles.placeOnTile(bog2, tiles.getTileLocation(26, 10))
+BOG3 = sprites.create(img`
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . f e d d d d e . . . . . . . 
+    . . f e d d d d e . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    `, SpriteKind.BOG3)
+tiles.placeOnTile(BOG3, tiles.getTileLocation(55, 10))
+BOG5 = sprites.create(img`
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . f e d d d d e . . . . . . . 
+    . . f e d d d d e . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . f e e e e e e . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    `, SpriteKind.BOG5)
+tiles.placeOnTile(BOG5, tiles.getTileLocation(79, 10))
+Dialogmode = false
+game.onUpdateInterval(1500, function () {
+    BIL1 = sprites.createProjectileFromSide(img`
+        . . . . . . . . . . . . . . . . 
+        . . . . 2 2 2 2 2 2 2 2 . . . . 
+        . . . 2 4 2 2 2 2 2 2 c 2 . . . 
+        . . 2 c 4 2 2 2 2 2 2 c c 2 . . 
+        . 2 c c 4 4 4 4 4 4 2 c c 4 2 d 
+        . 2 c 2 e e e e e e e b c 4 2 2 
+        . 2 2 e b b e b b b e e b 4 2 2 
+        . 2 e b b b e b b b b e 2 2 2 2 
+        . e e 2 2 2 e 2 2 2 2 2 e 2 2 2 
+        . e e e e e e f e e e f e 2 d d 
+        . e e e e e e f e e f e e e 2 d 
+        . e e e e e e f f f e e e e e e 
+        . e f f f f e e e e f f f e e e 
+        . . f f f f f e e f f f f f e . 
+        . . . f f f . . . . f f f f . . 
+        . . . . . . . . . . . . . . . . 
+        `, 48, 0)
+    tiles.placeOnTile(BIL1, tiles.getTileLocation(18, 10))
+    BIl2 = sprites.createProjectileFromSide(img`
+        . . . . . . . 8 8 8 8 8 . . . . 
+        . . . . . 8 8 6 6 6 6 6 8 . . . 
+        . . . . 8 8 6 6 6 6 6 6 6 8 . . 
+        . . . . 8 9 7 6 6 6 6 6 7 b 8 . 
+        . . 8 8 9 9 7 7 6 6 6 6 7 9 b 8 
+        . 8 6 6 9 9 7 7 7 6 6 6 7 9 9 8 
+        8 6 6 6 9 9 6 7 7 7 7 7 6 9 9 8 
+        8 6 6 6 9 9 8 8 8 8 8 8 8 9 9 8 
+        8 6 6 6 9 b 8 b b b 8 b 8 b 9 8 
+        8 6 8 8 8 8 b b b b 8 b b 8 b 8 
+        8 8 3 3 8 8 6 6 6 6 8 6 6 8 8 8 
+        8 3 3 8 8 8 8 8 8 8 8 8 8 8 8 8 
+        8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 
+        8 8 8 8 f f f 8 8 8 8 f f f 8 8 
+        . 8 8 f b c c f 8 8 f b c c f . 
+        . . . . b b f . . . . b b f . . 
+        `, -48, 0)
+    tiles.placeOnTile(BIl2, tiles.getTileLocation(36, 10))
+    BIl2.setStayInScreen(false)
+    Bil3 = sprites.createProjectileFromSide(img`
+        . . . . . . . . . . . . . . . . 
+        . . . . 2 2 2 2 2 2 2 2 . . . . 
+        . . . 2 4 2 2 2 2 2 2 c 2 . . . 
+        . . 2 c 4 2 2 2 2 2 2 c c 2 . . 
+        . 2 c c 4 4 4 4 4 4 2 c c 4 2 d 
+        . 2 c 2 e e e e e e e b c 4 2 2 
+        . 2 2 e b b e b b b e e b 4 2 2 
+        . 2 e b b b e b b b b e 2 2 2 2 
+        . e e 2 2 2 e 2 2 2 2 2 e 2 2 2 
+        . e e e e e e f e e e f e 2 d d 
+        . e e e e e e f e e f e e e 2 d 
+        . e e e e e e f f f e e e e e e 
+        . e f f f f e e e e f f f e e e 
+        . . f f f f f e e f f f f f e . 
+        . . . f f f . . . . f f f f . . 
+        . . . . . . . . . . . . . . . . 
+        `, 48, 0)
+    tiles.placeOnTile(Bil3, tiles.getTileLocation(47, 10))
+})
+game.onUpdateInterval(1500, function () {
+    Bil4 = sprites.createProjectileFromSide(img`
+        . . . . . . . . . . . . . . . . 
+        . . . . 2 2 2 2 2 2 2 2 . . . . 
+        . . . 2 4 2 2 2 2 2 2 c 2 . . . 
+        . . 2 c 4 2 2 2 2 2 2 c c 2 . . 
+        . 2 c c 4 4 4 4 4 4 2 c c 4 2 d 
+        . 2 c 2 e e e e e e e b c 4 2 2 
+        . 2 2 e b b e b b b e e b 4 2 2 
+        . 2 e b b b e b b b b e 2 2 2 2 
+        . e e 2 2 2 e 2 2 2 2 2 e 2 2 2 
+        . e e e e e e f e e e f e 2 d d 
+        . e e e e e e f e e f e e e 2 d 
+        . e e e e e e f f f e e e e e e 
+        . e f f f f e e e e f f f e e e 
+        . . f f f f f e e f f f f f e . 
+        . . . f f f . . . . f f f f . . 
+        . . . . . . . . . . . . . . . . 
+        `, 48, 0)
+    tiles.placeOnTile(Bil4, tiles.getTileLocation(59, 10))
+    Bil4.setStayInScreen(false)
+    Bil5 = sprites.createProjectileFromSide(img`
+        . . . . . . . 8 8 8 8 8 . . . . 
+        . . . . . 8 8 6 6 6 6 6 8 . . . 
+        . . . . 8 8 6 6 6 6 6 6 6 8 . . 
+        . . . . 8 9 7 6 6 6 6 6 7 b 8 . 
+        . . 8 8 9 9 7 7 6 6 6 6 7 9 b 8 
+        . 8 6 6 9 9 7 7 7 6 6 6 7 9 9 8 
+        8 6 6 6 9 9 6 7 7 7 7 7 6 9 9 8 
+        8 6 6 6 9 9 8 8 8 8 8 8 8 9 9 8 
+        8 6 6 6 9 b 8 b b b 8 b 8 b 9 8 
+        8 6 8 8 8 8 b b b b 8 b b 8 b 8 
+        8 8 3 3 8 8 6 6 6 6 8 6 6 8 8 8 
+        8 3 3 8 8 8 8 8 8 8 8 8 8 8 8 8 
+        8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 
+        8 8 8 8 f f f 8 8 8 8 f f f 8 8 
+        . 8 8 f b c c f 8 8 f b c c f . 
+        . . . . b b f . . . . b b f . . 
+        `, -48, 0)
+    tiles.placeOnTile(Bil5, tiles.getTileLocation(74, 10))
+    Bil5.setStayInScreen(false)
+})
+forever(function () {
+    if (Dialogmode == false) {
+        controller.moveSprite(SKoledreng, 100, 0)
+    } else {
+        controller.moveSprite(SKoledreng, 0, 0)
+    }
+})
+game.onUpdateInterval(200, function () {
+    if (controller.right.isPressed()) {
+        animation.setAction(SKoledreng, ActionKind.Walking)
+        walker = animation.createAnimation(ActionKind.Walking, 100)
+        walker.addAnimationFrame(img`
+            . . . . f f f f f . . . 
+            . . f f e e e e e f . . 
+            . f f e e e e e e e f . 
+            f f f f e e e e e e e f 
+            f f f f f e e e 4 e e f 
+            f f f f e e e 4 4 e e f 
+            f f f f 4 4 4 4 4 e f f 
+            f f 4 e 4 f f 4 4 e f f 
+            . f 4 d 4 d d d d f f . 
+            . f f f 4 d d b b f . . 
+            . . f e e 4 4 4 e f . . 
+            . . 4 d d e 1 1 1 f . . 
+            . . e d d e 1 1 1 f . . 
+            . . f e e f 6 6 6 f . . 
+            . . . f f f f f f . . . 
+            . . . . f f f . . . . . 
+            `)
+        walker.addAnimationFrame(img`
+            . . . . . . . . . . . . 
+            . . . f f f f f f . . . 
+            . f f f e e e e e f . . 
+            f f f e e e e e e e f . 
+            f f f f e e e e e e e f 
+            f f f f f e e e 4 e e f 
+            f f f f e e e 4 4 e e f 
+            f f f f 4 4 4 4 4 e f f 
+            f f 4 e 4 f f 4 4 e f . 
+            f f 4 d 4 d d d d f . . 
+            . f f f 4 d d b b f . . 
+            . 4 d d e 4 4 4 e f . . 
+            . e d d e 1 1 1 1 f . . 
+            . f e e f 6 6 6 6 f f . 
+            . f f f f f f f f f f . 
+            . . f f . . . f f f . . 
+            `)
+        walker.addAnimationFrame(img`
+            . . . . f f f f f . . . 
+            . . f f e e e e e f . . 
+            . f f e e e e e e e f . 
+            f f f f e e e e e e e f 
+            f f f f f e e e 4 e e f 
+            f f f f e e e 4 4 e e f 
+            f f f f 4 4 4 4 4 e f f 
+            f f 4 e 4 f f 4 4 e f f 
+            . f 4 d 4 d d d d f f . 
+            . f f f 4 d d b b f . . 
+            . . f e e 4 4 4 e f . . 
+            . . 4 d d e 1 1 1 f . . 
+            . . e d d e 1 1 1 f . . 
+            . . f e e f 6 6 6 f . . 
+            . . . f f f f f f . . . 
+            . . . . f f f . . . . . 
+            `)
+        walker.addAnimationFrame(img`
+            . . . . . . . . . . . . 
+            . . . f f f f f f . . . 
+            . f f f e e e e e f . . 
+            f f f e e e e e e e f . 
+            f f f f e e e e e e e f 
+            f f f f f e e e 4 e e f 
+            f f f f e e e 4 4 e e f 
+            f f f f 4 4 4 4 4 e f f 
+            f f 4 e 4 f f 4 4 e f . 
+            f f 4 d 4 d d d d f . . 
+            . f f f 4 d d b b f . . 
+            . 4 d d e 4 4 4 e f . . 
+            . e d d e 1 1 1 1 f . . 
+            . f e e f 6 6 6 6 f f . 
+            . f f f f f f f f f f . 
+            . . f f . . . f f f . . 
+            `)
+        animation.attachAnimation(SKoledreng, walker)
+        gå = true
+    } else {
+        animation.stopAnimation(animation.AnimationTypes.All, SKoledreng)
+    }
+})
+game.onUpdateInterval(200, function () {
+    if (controller.left.isPressed()) {
+        animation.setAction(SKoledreng, ActionKind.Walking)
+        walker = animation.createAnimation(ActionKind.Walking, 100)
+        walker.addAnimationFrame(img`
+            . . . f f f f f . . . . 
+            . . f e e e e e f f . . 
+            . f e e e e e e e f f . 
+            f e e e e e e e f f f f 
+            f e e 4 e e e f f f f f 
+            f e e 4 4 e e e f f f f 
+            f f e 4 4 4 4 4 f f f f 
+            f f e 4 4 f f 4 e 4 f f 
+            . f f d d d d 4 d 4 f . 
+            . . f b b d d 4 f f f . 
+            . . f e 4 4 4 e e f . . 
+            . . f 1 1 1 e d d 4 . . 
+            . . f 1 1 1 e d d e . . 
+            . . f 6 6 6 f e e f . . 
+            . . . f f f f f f . . . 
+            . . . . . f f f . . . . 
+            `)
+        walker.addAnimationFrame(img`
+            . . . . . . . . . . . . 
+            . . . f f f f f f . . . 
+            . . f e e e e e f f f . 
+            . f e e e e e e e f f f 
+            f e e e e e e e f f f f 
+            f e e 4 e e e f f f f f 
+            f e e 4 4 e e e f f f f 
+            f f e 4 4 4 4 4 f f f f 
+            . f e 4 4 f f 4 e 4 f f 
+            . . f d d d d 4 d 4 f . 
+            . . f b b d e e f f f . 
+            . . f e 4 e d d 4 f . . 
+            . . f 1 1 e d d e f . . 
+            . f f 6 6 f e e f f f . 
+            . f f f f f f f f f f . 
+            . . f f f . . . f f . . 
+            `)
+        walker.addAnimationFrame(img`
+            . . . f f f f f . . . . 
+            . . f e e e e e f f . . 
+            . f e e e e e e e f f . 
+            f e e e e e e e f f f f 
+            f e e 4 e e e f f f f f 
+            f e e 4 4 e e e f f f f 
+            f f e 4 4 4 4 4 f f f f 
+            f f e 4 4 f f 4 e 4 f f 
+            . f f d d d d 4 d 4 f . 
+            . . f b b d d 4 f f f . 
+            . . f e 4 4 4 e e f . . 
+            . . f 1 1 1 e d d 4 . . 
+            . . f 1 1 1 e d d e . . 
+            . . f 6 6 6 f e e f . . 
+            . . . f f f f f f . . . 
+            . . . . . f f f . . . . 
+            `)
+        walker.addAnimationFrame(img`
+            . . . . . . . . . . . . 
+            . . . f f f f f f . . . 
+            . . f e e e e e f f f . 
+            . f e e e e e e e f f f 
+            f e e e e e e e f f f f 
+            f e e 4 e e e f f f f f 
+            f e e 4 4 e e e f f f f 
+            f f e 4 4 4 4 4 f f f f 
+            . f e 4 4 f f 4 e 4 f f 
+            . . f d d d d 4 d 4 f . 
+            . . f b b d e e f f f . 
+            . . f e 4 e d d 4 f . . 
+            . . f 1 1 e d d e f . . 
+            . f f 6 6 f e e f f f . 
+            . f f f f f f f f f f . 
+            . . f f f . . . f f . . 
+            `)
+        animation.attachAnimation(SKoledreng, walker)
+        gå = true
+    } else {
+    	
     }
 })
